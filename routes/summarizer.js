@@ -1,31 +1,28 @@
-const express = require("express");
-const axios = require("axios");
+import fetch from "node-fetch";
 
-const router = express.Router();
-
-router.post("/", async (req, res) => {
+const summarize = async (text) => {
   try {
-    const { text } = req.body;
-
-    // Call your AI API (OpenRouter/Mistral etc.)
-    const response = await axios.post(
-      "https://openrouter.ai/api/v1/chat/completions",
-      {
-        model: "mistral",
-        messages: [{ role: "user", content: `Summarize: ${text}` }]
+    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`,
+        "Content-Type": "application/json"
       },
-      {
-        headers: {
-          Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
-          "Content-Type": "application/json"
-        }
-      }
-    );
+      body: JSON.stringify({
+        model: "mistral/mistral-7b-instruct", // change if needed
+        messages: [
+          { role: "system", content: "You are a legal document summarizer. Summarize clearly." },
+          { role: "user", content: text }
+        ]
+      })
+    });
 
-    res.json({ summary: response.data.choices[0].message.content });
-  } catch (err) {
-    res.status(500).json({ error: "Summarization failed" });
+    const data = await response.json();
+    return data.choices?.[0]?.message?.content || "Summary not available";
+  } catch (error) {
+    console.error(error);
+    return "Error in summarization";
   }
-});
+};
 
-module.exports = router;
+export default summarize;
