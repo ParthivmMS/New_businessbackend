@@ -1,30 +1,28 @@
 const express = require("express");
 const bodyParser = require("body-parser");
-const summarize = require("./summarizer");
+const summarizer = require("./summarizer");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(bodyParser.json());
 
-// Health check route
-app.get("/", (req, res) => {
-  res.send("⚖️ Summarizer Backend is running!");
-});
-
-// Summarization API
+// Simple API route
 app.post("/summarize", async (req, res) => {
   try {
     const { text } = req.body;
+
     if (!text) {
       return res.status(400).json({ error: "No text provided" });
     }
 
-    const summary = await summarize(text);
+    // Call our summarizer
+    const summary = await summarizer(text);
+
     res.json({ summary });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Internal Server Error" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Something went wrong" });
   }
 });
 
