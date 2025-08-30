@@ -1,7 +1,7 @@
 {
   "name": "verdictforge-backend",
   "version": "1.0.0",
-  "description": "Backend for legal judgment summarizer",
+  "description": "Backend for VerdictForge Summarizer",
   "main": "summarizer.js",
   "scripts": {
     "start": "node summarizer.js"
