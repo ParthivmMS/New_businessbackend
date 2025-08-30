@@ -1,5 +1,6 @@
 const express = require("express");
 const bodyParser = require("body-parser");
+const summarizeText = require("./summarizer.js"); // 👈 Import summarizer
 
 const app = express();
 app.use(bodyParser.json());
@@ -8,17 +9,22 @@ app.get("/", (req, res) => {
   res.send("✅ Backend is running on Render!");
 });
 
-// Example POST API
-app.post("/summarize", (req, res) => {
-  const { text } = req.body;
-  if (!text) return res.status(400).json({ error: "No text provided" });
+app.post("/summarize", async (req, res) => {
+  try {
+    const { text } = req.body;
+    if (!text) return res.status(400).json({ error: "No text provided" });
 
-  // For now, just return fake summary
-  res.json({ summary: text.slice(0, 100) + "..." });
+    // Call real summarizer
+    const summary = await summarizeText(text);
+
+    res.json({ summary });
+  } catch (error) {
+    console.error("❌ Summarization failed:", error);
+    res.status(500).json({ error: "Summarization failed" });
+  }
 });
 
-// Render will set PORT automatically
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`🚀 Server running on port ${PORT}`);
 });
